@@ -134,11 +134,12 @@ class ParameterizedQuery(object):
         validators = {
             "text": lambda value: isinstance(value, basestring),
             "number": _is_number,
-            "enum": lambda value: _is_value_within_options(value,\
-                definition["enumOptions"].split('\n'), definition["allowMultipleValues"]),
-            "query": lambda value: _is_value_within_options(value,\
-                [v["value"] for v in dropdown_values(definition["queryId"])],\
-                definition["allowMultipleValues"]),
+            "enum": lambda value: _is_value_within_options(value,
+                                    definition["enumOptions"].split('\n'),
+                                    definition["allowMultipleValues"]),
+            "query": lambda value: _is_value_within_options(value,
+                                    [v["value"] for v in dropdown_values(definition["queryId"])],
+                                    definition["allowMultipleValues"]),
             "date": _is_date,
             "datetime-local": _is_date,
             "datetime-with-seconds": _is_date,
