@@ -200,8 +200,6 @@ default_query_runners = [
     'redash.query_runner.drill',
     'redash.query_runner.uptycs',
     'redash.query_runner.snowflake',
-    'redash.query_runner.phoenix',
-    'redash.query_runner.json_ds',
     'redash.query_runner.dgraph'
 ]
 
