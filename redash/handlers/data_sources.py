@@ -159,7 +159,7 @@ class DataSourceSchemaResource(BaseResource):
         except Exception as e:
             response['error'] = {
                 'code': 2,
-                'message': 'Error retrieving schema.' + e
+                'message': 'Error retrieving schema.' + str(e)
             }
 
         return response
