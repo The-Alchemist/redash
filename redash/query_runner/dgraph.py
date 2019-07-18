@@ -58,6 +58,9 @@ class Dgraph(BaseQueryRunner):
         client_stub = pydgraph.DgraphClientStub(servers)
         client = pydgraph.DgraphClient(client_stub)
 
+        json_data = None
+        error = None
+
         txn = client.txn(read_only=True)
         try:
             response_raw = txn.query(query)
@@ -77,11 +80,14 @@ class Dgraph(BaseQueryRunner):
 
             error = None
             json_data = json_dumps(data)
+
+        except Exception as e:
+            error = e
         finally:
             txn.discard()
             client_stub.close()
 
-        return json_data, None
+        return json_data, error
 
     def get_schema(self, get_stats=False):
         """Queries Dgraph for all the predicates, their types, their tokenizers, etc.
