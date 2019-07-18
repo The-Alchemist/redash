@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from flask import make_response, request
 from flask_restful import abort
@@ -157,9 +158,10 @@ class DataSourceSchemaResource(BaseResource):
                 'message': 'Data source type does not support retrieving schema'
             }
         except Exception as e:
+            logging.exception(e)
             response['error'] = {
                 'code': 2,
-                'message': 'Error retrieving schema.' + str(e)
+                'message': 'Error retrieving schema: ' + traceback.format_exc()
             }
 
         return response
