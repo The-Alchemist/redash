@@ -156,10 +156,10 @@ class DataSourceSchemaResource(BaseResource):
                 'code': 1,
                 'message': 'Data source type does not support retrieving schema'
             }
-        except Exception:
+        except Exception as e:
             response['error'] = {
                 'code': 2,
-                'message': 'Error retrieving schema.'
+                'message': 'Error retrieving schema.' + e
             }
 
         return response
