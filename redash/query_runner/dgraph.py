@@ -11,6 +11,7 @@ from redash.utils import json_dumps, json_loads
 
 
 def to_string(s):
+    """From https://github.com/vinay20045/json-to-csv"""
     try:
         return str(s)
     except:
@@ -19,13 +20,13 @@ def to_string(s):
 
 
 def reduce_item(reduced_item, key, value):
-
+    """From https://github.com/vinay20045/json-to-csv"""
     # Reduction Condition 1
     if type(value) is list:
-        i=0
+        i = 0
         for sub_item in value:
             reduce_item(reduced_item, key+'/'+to_string(i), sub_item)
-            i=i+1
+            i = i+1
 
     # Reduction Condition 2
     elif type(value) is dict:
@@ -115,9 +116,10 @@ class Dgraph(BaseQueryRunner):
 
             processed_data = []
             header = []
+            # use logic from https://github.com/vinay20045/json-to-csv
             for item in data_to_be_processed:
                 reduced_item = {}
-                reduce_item(reduced_item, first_node, item)
+                reduce_item(reduced_item, first_key, item)
 
                 header += reduced_item.keys()
 
