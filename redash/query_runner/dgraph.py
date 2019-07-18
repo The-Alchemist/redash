@@ -10,6 +10,34 @@ from redash.query_runner import BaseQueryRunner, register
 from redash.utils import json_dumps, json_loads
 
 
+def to_string(s):
+    try:
+        return str(s)
+    except:
+        # Change the encoding type if needed
+        return s.encode('utf-8')
+
+
+def reduce_item(reduced_item, key, value):
+
+    # Reduction Condition 1
+    if type(value) is list:
+        i=0
+        for sub_item in value:
+            reduce_item(reduced_item, key+'/'+to_string(i), sub_item)
+            i=i+1
+
+    # Reduction Condition 2
+    elif type(value) is dict:
+        sub_keys = value.keys()
+        for sub_key in sub_keys:
+            reduce_item(reduced_item, key+'/'+to_string(sub_key), value[sub_key])
+
+    # Base Condition
+    else:
+        reduced_item[to_string(key)] = to_string(value)
+
+
 class Dgraph(BaseQueryRunner):
     noop_query = """
     {
@@ -83,16 +111,26 @@ class Dgraph(BaseQueryRunner):
             first_key = next(iter(data.keys()))
             first_node = data[first_key]
 
-            # grab all the column names
-            column_names = set().union(*first_node)
-            # create a dict for column names in the format that the API wants
-            # the type as 'string' is just a hack for now
-            columns = [{'name': c, 'friendly_name': c, 'type': 'string'} for c in column_names]
+            data_to_be_processed = first_node
+
+            processed_data = []
+            header = []
+            for item in data_to_be_processed:
+                reduced_item = {}
+                reduce_item(reduced_item, first_node, item)
+
+                header += reduced_item.keys()
+
+                processed_data.append(reduced_item)
+
+            header = list(set(header))
+
+            columns = [{'name': c, 'friendly_name': c, 'type': 'string'} for c in header]
+
             # finally, assemble both the columns and data
-            data = {'columns': columns, 'rows': first_node}
+            data = {'columns': columns, 'rows': processed_data}
 
             json_data = json_dumps(data)
-
         except Exception as e:
             error = e
 
