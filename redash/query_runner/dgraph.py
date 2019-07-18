@@ -51,19 +51,34 @@ class Dgraph(BaseQueryRunner):
         """Dgraph uses '#' as a comment delimiter, not '/* */'"""
         return False
 
-    def run_query(self, query, user):
+    def run_dgraph_query_raw(self, query):
 
         servers = self.configuration.get('servers')
 
         client_stub = pydgraph.DgraphClientStub(servers)
         client = pydgraph.DgraphClient(client_stub)
 
-        json_data = None
-        error = None
-
         txn = client.txn(read_only=True)
         try:
             response_raw = txn.query(query)
+
+            data = json.loads(response_raw.json)
+
+            return data
+
+        except Exception as e:
+            raise e
+        finally:
+            txn.discard()
+            client_stub.close()
+
+    def run_query(self, query, user):
+
+        json_data = None
+        error = None
+
+        try:
+            response_raw = self.run_dgraph_query_raw(query)
 
             data = json.loads(response_raw.json)
 
@@ -78,14 +93,10 @@ class Dgraph(BaseQueryRunner):
             # finally, assemble both the columns and data
             data = {'columns': columns, 'rows': first_node}
 
-            error = None
             json_data = json_dumps(data)
 
         except Exception as e:
             error = e
-        finally:
-            txn.discard()
-            client_stub.close()
 
         return json_data, error
 
@@ -95,13 +106,9 @@ class Dgraph(BaseQueryRunner):
         Dgraph only has one schema, and there's no such things as columns"""
         query = "schema {}"
 
-        results, error = self.run_query(query, None)
-
-        if error is not None:
-            raise Exception("Failed getting schema.")
+        results = self.run_dgraph_query_raw(query)
 
         schema = {}
-        results = json_loads(results)
 
         for row in results['schema']:
             table_name = row['predicate']
