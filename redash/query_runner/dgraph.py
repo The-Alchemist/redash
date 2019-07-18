@@ -78,9 +78,7 @@ class Dgraph(BaseQueryRunner):
         error = None
 
         try:
-            response_raw = self.run_dgraph_query_raw(query)
-
-            data = json.loads(response_raw.json)
+            data = self.run_dgraph_query_raw(query)
 
             first_key = next(iter(data.keys()))
             first_node = data[first_key]
